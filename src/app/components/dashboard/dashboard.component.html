@@ -1,0 +1,235 @@
+
+<div class="chat-app">
+
+  <!-- LEFT SIDEBAR -->
+  <aside class="sidebar" [class.mobile-hidden]="!sidebarVisible">
+
+    <div class="sidebar-header">
+
+      <div class="profile-section">
+        <div class="my-avatar">
+          {{ getInitials(currentUser?.name || 'User') }}
+        </div>
+
+        <div class="my-profile">
+          <h3>{{ currentUser?.name }}</h3>
+          <span>My account</span>
+        </div>
+      </div>
+
+      <button
+        class="logout-btn"
+        type="button"
+        (click)="logout()">
+        Logout
+      </button>
+
+    </div>
+
+    <!-- SEARCH -->
+    <div class="search-container">
+      <input
+        type="text"
+        placeholder="Search by name or email..."
+        [(ngModel)]="searchText"
+        (ngModelChange)="searchUsers()">
+    </div>
+
+    <div class="list-heading">
+      <span>CHATS</span>
+      <span>{{ filteredUsers.length }}</span>
+    </div>
+
+    <div class="status-message" *ngIf="loading">
+      Loading users...
+    </div>
+
+    <div class="error-message" *ngIf="errorMessage">
+      {{ errorMessage }}
+      <button type="button" (click)="loadUsers()">Retry</button>
+    </div>
+
+    <!-- USER LIST -->
+    <div class="user-list" *ngIf="!loading">
+
+      <button
+        type="button"
+        class="user-item"
+        *ngFor="let user of filteredUsers; trackBy: trackByUserId"
+        [class.active]="selectedUser?.id === user.id"
+        (click)="selectUser(user)">
+
+        <div class="avatar-wrapper">
+
+          <img
+            *ngIf="user.profileImage"
+            [src]="user.profileImage"
+            [alt]="user.name"
+            class="avatar">
+
+          <div
+            *ngIf="!user.profileImage"
+            class="avatar avatar-placeholder">
+            {{ getInitials(user.name) }}
+          </div>
+
+          <span
+            class="online-indicator"
+            [class.online]="user.isOnline">
+          </span>
+
+        </div>
+
+        <div class="user-details">
+          <div class="user-name">{{ user.name }}</div>
+          <div class="user-email">{{ user.email }}</div>
+        </div>
+
+      </button>
+
+      <div
+        class="empty-state"
+        *ngIf="filteredUsers.length === 0 && !errorMessage">
+        No users found
+      </div>
+
+    </div>
+
+  </aside>
+
+
+  <!-- RIGHT CHAT WINDOW -->
+  <main class="chat-window" [class.mobile-hidden]="sidebarVisible">
+
+    <ng-container *ngIf="selectedUser; else noChatSelected">
+
+      <!-- CHAT HEADER -->
+      <header class="chat-header">
+
+        <button
+          type="button"
+          class="back-btn"
+          (click)="showUserList()">
+          ←
+        </button>
+
+        <div class="avatar-wrapper">
+
+          <img
+            *ngIf="selectedUser.profileImage"
+            [src]="selectedUser.profileImage"
+            [alt]="selectedUser.name"
+            class="avatar">
+
+          <div
+            *ngIf="!selectedUser.profileImage"
+            class="avatar avatar-placeholder">
+            {{ getInitials(selectedUser.name) }}
+          </div>
+
+        </div>
+
+        <div class="selected-user-info">
+          <h3>{{ selectedUser.name }}</h3>
+          <span>
+            {{ selectedUser.isOnline ? 'Online' : 'Offline' }}
+          </span>
+        </div>
+
+      </header>
+
+
+      <!-- MESSAGE HISTORY -->
+      <section class="chat-body" #messageContainer>
+
+        <div class="loading-messages" *ngIf="loadingMessages">
+          Loading messages...
+        </div>
+
+        <div class="error-message" *ngIf="messageError">
+          {{ messageError }}
+        </div>
+
+        <div
+          class="no-messages"
+          *ngIf="!loadingMessages && messages.length === 0">
+          <div class="empty-chat-icon">💬</div>
+          <h3>No messages yet</h3>
+          <p>Send a message to start the conversation.</p>
+        </div>
+
+        <div class="message-list" *ngIf="!loadingMessages">
+
+          <div
+            class="message-row"
+            *ngFor="let message of messages; trackBy: trackByMessageId"
+            [class.my-message-row]="isMyMessage(message)">
+
+            <div
+              class="message-bubble"
+              [class.my-message]="isMyMessage(message)"
+              [class.other-message]="!isMyMessage(message)">
+
+              <div class="message-content">
+                {{ message.content }}
+              </div>
+
+              <div class="message-meta">
+                <span>
+                  {{ message.createdAt | date:'shortTime' }}
+                </span>
+
+                <span *ngIf="isMyMessage(message)" class="message-check">
+                  ✓
+                </span>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- MESSAGE COMPOSER -->
+      <footer class="message-composer">
+
+        <input
+          type="text"
+          placeholder="Type a message..."
+          [(ngModel)]="messageText"
+          maxlength="5000"
+          (keydown.enter)="sendMessage()"
+          [disabled]="loadingMessages || sendingMessage">
+
+        <button
+          type="button"
+          (click)="sendMessage()"
+          [disabled]="!messageText.trim() || sendingMessage || loadingMessages">
+
+          {{ sendingMessage ? 'Sending...' : 'Send' }}
+
+        </button>
+
+      </footer>
+
+    </ng-container>
+
+
+    <!-- EMPTY CHAT -->
+    <ng-template #noChatSelected>
+
+      <div class="welcome-screen">
+        <div class="welcome-icon">💬</div>
+        <h1>MEAN Chat Application</h1>
+        <p>Select a user from the left panel to start a conversation.</p>
+        <span>Real-time messaging powered by Socket.IO.</span>
+      </div>
+
+    </ng-template>
+
+  </main>
+
+</div>
