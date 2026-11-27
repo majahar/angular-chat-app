@@ -18,7 +18,9 @@ export class SocketService {
   private socket: Socket | null = null;
 
   //private socketUrl = 'http://localhost:5000';
-  private socketUrl = environment.socketUrl;
+  //private socketUrl = environment.socketUrl;
+  private socketUrl = 'https://chat-app-mc3t.onrender.com';
+
   
 
   private activeConversationId: string | null = null;
