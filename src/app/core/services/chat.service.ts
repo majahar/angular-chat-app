@@ -16,9 +16,10 @@ export class ChatService {
   private http = inject(HttpClient);
 
   //private apiUrl = 'http://localhost:5000/api';
-   private apiUrl = environment.apiUrl;
-  private socketUrl = environment.socketUrl;
-
+ //  private apiUrl = environment.apiUrl;
+ // private socketUrl = environment.socketUrl;
+     private apiUrl = 'https://chat-app-mc3t.onrender.com/api';
+     private socketUrl = 'https://chat-app-mc3t.onrender.com';
   createOrGetConversation(receiverId: string) {
     return this.http.post<ConversationResponse>(
       `${this.apiUrl}/conversations`,
